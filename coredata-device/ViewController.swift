@@ -7,18 +7,40 @@
 //
 
 import UIKit
+import CoreData
 
 class ViewController: UIViewController {
 
     @IBOutlet weak var tableView: UITableView!
     //TODO: refactor in-app storage to use NSManagedObject array
-    var serialNumbers:[String] = []
+    var serialNumbers:[NSManagedObject] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         title = "Devices"
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
+    }
+    override func viewWillAppear(_ animated: Bool) {
+         super.viewWillAppear(animated)
+        //1 get a reference to appdelegate again like in
+        guard let appDelegate =
+              UIApplication.shared.delegate as? AppDelegate else {
+                return
+            }
+            let managedContext =
+              appDelegate.persistentContainer.viewContext
+        //2
+        let fetchRequest =
+        NSFetchRequest<NSManagedObject>(entityName: "Device")
+        //3
+        do {
+              serialNumbers = try managedContext.fetch(fetchRequest)
+            } catch let error as NSError {
+              print("Could not fetch. \(error), \(error.userInfo)")
+            }
+        
+        
     }
 
     @IBAction func addDevice(_ sender: UIBarButtonItem) {
@@ -31,8 +53,9 @@ class ViewController: UIViewController {
             {
                 return
             }
-            
-            self.serialNumbers.append(serialNumber)
+            //call the save() to update the model and not the array append
+            self.save(with: serialNumber)
+            //self.serialNumbers.append(serialNumber)
             self.tableView.reloadData()
         })
         
@@ -46,6 +69,32 @@ class ViewController: UIViewController {
     
     func save(with serialNumber:String){
         //TODO:Use the MOC with the Device entity to create a newDevice object, update it's property and save it to persistent storage
+        
+        guard let appDelegate =
+               UIApplication.shared.delegate as? AppDelegate else {
+               return
+             }
+        // 1 get a NSManagedObjectContex an inmemory scratchpad for working with managed objects
+        let managedContext =
+          appDelegate.persistentContainer.viewContext
+        //2 Use the MOC with the Device entity to create a newDevice object, update it's property and save it to persistent storage
+
+        let entity =
+          NSEntityDescription.entity(forEntityName: "Device",
+                                     in: managedContext)!
+        
+        let newDevice = NSManagedObject(entity: entity,
+                                     insertInto: managedContext)
+        // 3 must spell the name attribute the same as it appears in the data model. this sets the attribute using keyvalue pair
+         newDevice.setValue(serialNumber, forKeyPath: "serialNumber")
+             
+        //4 commint changes to the serialNumbers
+        do {
+          try managedContext.save()
+          serialNumbers.append(newDevice)
+        } catch let error as NSError {
+          print("Could not save. \(error), \(error.userInfo)")
+        }
     }
 }
 
@@ -53,9 +102,12 @@ class ViewController: UIViewController {
 extension ViewController:UITableViewDataSource{
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         //TODO: refactor to get the device object and use it's value(forKeyPath: ) method to pull the serialNumber text
-        cell.textLabel?.text = serialNumbers[indexPath.row]
+     let serialNumber = serialNumbers[indexPath.row]
+        
+        cell.textLabel?.text = serialNumber.value(forKeyPath: "serialNumber") as? String//serialNumber[indexPath.row]
         return cell
     }
     
