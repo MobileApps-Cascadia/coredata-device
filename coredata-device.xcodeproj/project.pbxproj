@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3FD34C3523553C18006079E0 /* CellTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FD34C3423553C18006079E0 /* CellTableViewCell.swift */; };
 		D14BD0162353FD18008357E2 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D14BD0152353FD18008357E2 /* AppDelegate.swift */; };
 		D14BD0182353FD18008357E2 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D14BD0172353FD18008357E2 /* ViewController.swift */; };
 		D14BD01B2353FD18008357E2 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D14BD0192353FD18008357E2 /* Main.storyboard */; };
@@ -16,6 +17,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		3FD34C3423553C18006079E0 /* CellTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CellTableViewCell.swift; sourceTree = "<group>"; };
 		D14BD0122353FD18008357E2 /* coredata-device.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "coredata-device.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D14BD0152353FD18008357E2 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D14BD0172353FD18008357E2 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -63,6 +65,7 @@
 				D14BD0212353FD19008357E2 /* LaunchScreen.storyboard */,
 				D14BD0242353FD19008357E2 /* Info.plist */,
 				D14BD01C2353FD18008357E2 /* coredata_device.xcdatamodeld */,
+				3FD34C3423553C18006079E0 /* CellTableViewCell.swift */,
 			);
 			path = "coredata-device";
 			sourceTree = "<group>";
@@ -139,6 +142,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D14BD0182353FD18008357E2 /* ViewController.swift in Sources */,
+				3FD34C3523553C18006079E0 /* CellTableViewCell.swift in Sources */,
 				D14BD0162353FD18008357E2 /* AppDelegate.swift in Sources */,
 				D14BD01E2353FD18008357E2 /* coredata_device.xcdatamodeld in Sources */,
 			);
