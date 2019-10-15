@@ -39,7 +39,9 @@ class ViewController: UIViewController {
         let fetchRequest =
             NSFetchRequest<NSManagedObject>(entityName: "Device")
         
+        let myType: String = "iPad"
         
+        fetchRequest.predicate = NSPredicate(format: "type == %@", myType)
         //3
         do {
             devices = try managedContext.fetch(fetchRequest)
