@@ -33,6 +33,11 @@ class ViewController: UIViewController {
         //2
         let fetchRequest =
         NSFetchRequest<NSManagedObject>(entityName: "Device")
+        
+        //add predicate 
+        let deviceType = "ipad"
+        
+        fetchRequest.predicate = NSPredicate(format: "type == %@", deviceType)
         //3
         do {
               serialNumbers = try managedContext.fetch(fetchRequest)
