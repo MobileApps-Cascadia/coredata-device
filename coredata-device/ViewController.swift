@@ -76,7 +76,10 @@ class ViewController: UIViewController {
     }
     
     func reload(){
-        if let fetchedDevices = try? managedContext.fetch(Device.fetchRequest()) as [Device] {
+        let request = Device.fetchRequest() as NSFetchRequest<Device>
+        let predicate = NSPredicate(format: "type == %@", "iPad")
+        request.predicate = predicate
+        if let fetchedDevices = try? managedContext.fetch(request) as [Device] {
             devices = fetchedDevices
         }
         tableView.reloadData()
