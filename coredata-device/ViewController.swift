@@ -15,6 +15,9 @@ class ViewController: UIViewController {
     //TODO: refactor in-app storage to use NSManagedObject array
     var devices:[NSManagedObject] = []
     
+    let managedContext = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    lazy var entity = NSEntityDescription.entity(forEntityName: "Device", in: managedContext)!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -22,6 +25,12 @@ class ViewController: UIViewController {
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        reload()
+        
+    }
+    
     @IBAction func addDevice(_ sender: UIBarButtonItem) {
         let alert = UIAlertController(title: "New Device", message: "Enter Device Serial Number", preferredStyle: .alert)
         
@@ -33,8 +42,8 @@ class ViewController: UIViewController {
                 return
             }
             
-            self.serialNumbers.append(serialNumber)
-            self.tableView.reloadData()
+            self.save(with: serialNumber)
+            self.reload()
         })
         
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
@@ -47,6 +56,22 @@ class ViewController: UIViewController {
     
     func save(with serialNumber:String){
         //TODO:Use the MOC with the Device entity to create a newDevice object, update it's property and save it to persistent storage
+        let newDevice = NSManagedObject(entity: entity, insertInto: managedContext)
+        newDevice.setValue(serialNumber, forKey: "serialNumber")
+        
+        do {
+            try managedContext.save()
+            print("device with serial number \(serialNumber) saved")
+        } catch {
+            print("error saving context")
+        }
+    }
+    
+    func reload(){
+        if let fetchedDevices = try? managedContext.fetch(Device.fetchRequest()) as [Device] {
+            devices = fetchedDevices
+        }
+        tableView.reloadData()
     }
 }
 
