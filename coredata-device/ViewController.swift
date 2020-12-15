@@ -65,11 +65,13 @@ class ViewController: UIViewController {
     func save(with serialNumber: String, with deviceType: String){
         //TODO:Use the MOC with the Device entity to create a newDevice object, update it's property and save it to persistent storage
         let newDevice = NSManagedObject(entity: entity, insertInto: managedContext)
+        let id = UUID()
         newDevice.setValue(serialNumber, forKey: "serialNumber")
         newDevice.setValue(deviceType, forKey: "type")
+        newDevice.setValue(id, forKey: "id")
         do {
             try managedContext.save()
-            print("device with serial number \(serialNumber) saved")
+//            print("device with serial number \(serialNumber), type \(deviceType), and id \(id) saved")
         } catch {
             print("error saving context")
         }
@@ -83,7 +85,6 @@ class ViewController: UIViewController {
             devices = fetchedDevices
         }
         tableView.reloadData()
-        print(devices.count)
     }
 }
 
@@ -93,10 +94,13 @@ extension ViewController:UITableViewDataSource{
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         //TODO: refactor to get the device object and use it's value(forKeyPath: ) method to pull the serialNumber text
-        let serialNumber = devices[indexPath.row].value(forKeyPath: "serialNumber") as? String ?? ""
-        let deviceType = devices[indexPath.row].value(forKeyPath: "type") as? String ?? ""
+        let device = devices[indexPath.row]
+        let serialNumber = device.value(forKeyPath: "serialNumber") as? String ?? ""
+        let deviceType = device.value(forKeyPath: "type") as? String ?? ""
+        let id = (device.value(forKey: "id") as? UUID)?.uuidString ?? ""
+        
         cell.textLabel?.text = serialNumber
-        cell.detailTextLabel?.text = deviceType
+        cell.detailTextLabel?.text = deviceType + " - " + id
         return cell
     }
     
