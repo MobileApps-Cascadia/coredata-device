@@ -7,12 +7,13 @@
 //
 
 import UIKit
+import CoreData
 
 class ViewController: UIViewController {
 
     @IBOutlet weak var tableView: UITableView!
     //TODO: refactor in-app storage to use NSManagedObject array
-    var serialNumbers:[String] = []
+    var devices:[NSManagedObject] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -55,12 +56,14 @@ extension ViewController:UITableViewDataSource{
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         //TODO: refactor to get the device object and use it's value(forKeyPath: ) method to pull the serialNumber text
-        cell.textLabel?.text = serialNumbers[indexPath.row]
+        if let serialNumber = devices[indexPath.row].value(forKeyPath: "serialNumber") as? String {
+            cell.textLabel?.text = serialNumber
+        }
         return cell
     }
     
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return serialNumbers.count
+        return devices.count
     }
 }
