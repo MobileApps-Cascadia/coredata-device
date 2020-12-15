@@ -9,6 +9,17 @@
 import UIKit
 import CoreData
 
+class SubtitleTableViewCell: UITableViewCell {
+
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: .subtitle, reuseIdentifier: "Cell")
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
 class ViewController: UIViewController {
 
     @IBOutlet weak var tableView: UITableView!
@@ -22,7 +33,7 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         
         title = "Devices"
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
+        tableView.register(SubtitleTableViewCell.self, forCellReuseIdentifier: "Cell")
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -32,17 +43,14 @@ class ViewController: UIViewController {
     }
     
     @IBAction func addDevice(_ sender: UIBarButtonItem) {
-        let alert = UIAlertController(title: "New Device", message: "Enter Device Serial Number", preferredStyle: .alert)
+        let alert = UIAlertController(title: "New Device", message: "Enter Device Serial Number and Type", preferredStyle: .alert)
+        alert.addTextField(configurationHandler: nil)
         
-        let saveAction = UIAlertAction(title: "Save", style: .default, handler: {
-            action in
-            guard let textField = alert.textFields?.first,
-                  let serialNumber = textField.text else
-            {
-                return
-            }
+        let saveAction = UIAlertAction(title: "Save", style: .default, handler: { action in
             
-            self.save(with: serialNumber)
+            guard let serialNumberTextField = alert.textFields?.first, let serialNumber = serialNumberTextField.text else { return }
+            guard let deviceTypeTextField = alert.textFields?[1], let deviceType = deviceTypeTextField.text else { return }
+            self.save(with: serialNumber, with: deviceType)
             self.reload()
         })
         
@@ -54,11 +62,11 @@ class ViewController: UIViewController {
         present(alert,animated: true)
     }
     
-    func save(with serialNumber:String){
+    func save(with serialNumber: String, with deviceType: String){
         //TODO:Use the MOC with the Device entity to create a newDevice object, update it's property and save it to persistent storage
         let newDevice = NSManagedObject(entity: entity, insertInto: managedContext)
         newDevice.setValue(serialNumber, forKey: "serialNumber")
-        
+        newDevice.setValue(deviceType, forKey: "type")
         do {
             try managedContext.save()
             print("device with serial number \(serialNumber) saved")
@@ -72,6 +80,7 @@ class ViewController: UIViewController {
             devices = fetchedDevices
         }
         tableView.reloadData()
+        print(devices.count)
     }
 }
 
@@ -81,9 +90,10 @@ extension ViewController:UITableViewDataSource{
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         //TODO: refactor to get the device object and use it's value(forKeyPath: ) method to pull the serialNumber text
-        if let serialNumber = devices[indexPath.row].value(forKeyPath: "serialNumber") as? String {
-            cell.textLabel?.text = serialNumber
-        }
+        let serialNumber = devices[indexPath.row].value(forKeyPath: "serialNumber") as? String ?? ""
+        let deviceType = devices[indexPath.row].value(forKeyPath: "type") as? String ?? ""
+        cell.textLabel?.text = serialNumber
+        cell.detailTextLabel?.text = deviceType
         return cell
     }
     
