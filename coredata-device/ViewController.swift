@@ -7,12 +7,13 @@
 //
 
 import UIKit
+import CoreData
 
 class ViewController: UIViewController {
 
     @IBOutlet weak var tableView: UITableView!
     //TODO: refactor in-app storage to use NSManagedObject array
-    var serialNumbers:[String] = []
+    var device: [NSManagedObject] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,17 +25,17 @@ class ViewController: UIViewController {
     @IBAction func addDevice(_ sender: UIBarButtonItem) {
         let alert = UIAlertController(title: "New Device", message: "Enter Device Serial Number", preferredStyle: .alert)
         
-        let saveAction = UIAlertAction(title: "Save", style: .default, handler: {
-            action in
-            guard let textField = alert.textFields?.first,
-                  let serialNumber = textField.text else
-            {
-                return
-            }
-            
-            self.serialNumbers.append(serialNumber)
-            self.tableView.reloadData()
-        })
+        let saveAction = UIAlertAction(title: "Save", style: .default) {
+          [unowned self] action in
+          
+          guard let textField = alert.textFields?.first,
+            let serialNumber = textField.text else {
+              return
+          }
+          
+            self.save(serialNumber: serialNumber)
+          self.tableView.reloadData()
+        }
         
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
         
@@ -44,23 +45,79 @@ class ViewController: UIViewController {
         present(alert,animated: true)
     }
     
-    func save(with serialNumber:String){
-        //TODO:Use the MOC with the Device entity to create a newDevice object, update it's property and save it to persistent storage
+    func save(serialNumber: String) {
+      guard let appDelegate =
+        UIApplication.shared.delegate as? AppDelegate else {
+        return
+      }
+      
+      // 1
+      let managedContext =
+        appDelegate.persistentContainer.viewContext
+      
+      // 2
+      let entity =
+        NSEntityDescription.entity(forEntityName: "Device",
+                                   in: managedContext)!
+      
+      let devices = NSManagedObject(entity: entity,
+                                   insertInto: managedContext)
+      
+      // 3
+      devices.setValue(serialNumber, forKeyPath: "serialNumber")
+      
+      // 4
+      do {
+        try managedContext.save()
+       device.append(devices)
+      } catch let error as NSError {
+        print("Could not save. \(error), \(error.userInfo)")
+      }
     }
+    override func viewWillAppear(_ animated: Bool) {
+      super.viewWillAppear(animated)
+      
+      //1
+      guard let appDelegate =
+        UIApplication.shared.delegate as? AppDelegate else {
+          return
+      }
+      
+      let managedContext =
+        appDelegate.persistentContainer.viewContext
+      
+      //2
+      let fetchRequest =
+        NSFetchRequest<NSManagedObject>(entityName: "Device")
+      
+      //3
+      do {
+        device = try managedContext.fetch(fetchRequest)
+      } catch let error as NSError {
+        print("Could not fetch. \(error), \(error.userInfo)")
+      }
+    }
+    
+}
+// MARK: - UITableViewDataSource
+extension ViewController: UITableViewDataSource {
+  func tableView(_ tableView: UITableView,
+                 numberOfRowsInSection section: Int) -> Int {
+    return device.count
+  }
+
+  func tableView(_ tableView: UITableView,
+                 cellForRowAt indexPath: IndexPath)
+                 -> UITableViewCell {
+
+    let devices = device[indexPath.row]
+    let cell =
+      tableView.dequeueReusableCell(withIdentifier: "Cell",
+                                    for: indexPath)
+    cell.textLabel?.text =
+      devices.value(forKeyPath: "serialNumber") as? String
+    return cell
+  }
 }
 
-//MARK _ TableView Data Source: Refactor to use NSManagedObject array
-extension ViewController:UITableViewDataSource{
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-        //TODO: refactor to get the device object and use it's value(forKeyPath: ) method to pull the serialNumber text
-        cell.textLabel?.text = serialNumbers[indexPath.row]
-        return cell
-    }
-    
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return serialNumbers.count
-    }
-}
+
