@@ -6,6 +6,6 @@
         <attribute name="type" optional="YES" attributeType="String"/>
     </entity>
     <elements>
-        <element name="Device" positionX="-45" positionY="0" width="128" height="74"/>
+        <element name="Device" positionX="-45" positionY="0" width="128" height="88"/>
     </elements>
 </model>
